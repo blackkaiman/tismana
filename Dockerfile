@@ -36,6 +36,11 @@ RUN cp .env.example .env 2>/dev/null || true
 
 EXPOSE ${PORT:-8080}
 
-CMD php artisan key:generate --force 2>/dev/null; \
-    php artisan migrate --force 2>/dev/null; \
+ENV APP_KEY=base64:H0it+EIS0bJFcbDheYqM/c1RkEYzc+AaehqEs1qNECc=
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=/app/database/database.sqlite
+
+CMD php artisan migrate --force 2>/dev/null; \
     php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
