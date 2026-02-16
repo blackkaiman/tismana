@@ -31,16 +31,25 @@ RUN npm run build
 # Create SQLite database
 RUN mkdir -p database && touch database/database.sqlite
 
-# Copy .env.example if .env doesn't exist
-RUN cp .env.example .env 2>/dev/null || true
+# Create .env with correct values
+RUN echo "APP_NAME='Primaria Tismana'" > .env && \
+    echo "APP_ENV=production" >> .env && \
+    echo "APP_KEY=base64:H0it+EIS0bJFcbDheYqM/c1RkEYzc+AaehqEs1qNECc=" >> .env && \
+    echo "APP_DEBUG=true" >> .env && \
+    echo "APP_URL=https://tismana-production.up.railway.app" >> .env && \
+    echo "DB_CONNECTION=sqlite" >> .env && \
+    echo "DB_DATABASE=/app/database/database.sqlite" >> .env && \
+    echo "LOG_CHANNEL=stderr" >> .env && \
+    echo "SESSION_DRIVER=file" >> .env && \
+    echo "CACHE_DRIVER=file" >> .env && \
+    echo "QUEUE_CONNECTION=sync" >> .env
+
+# Cache config
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+
+# Run migrations
+RUN php artisan migrate --force
 
 EXPOSE ${PORT:-8080}
 
-ENV APP_KEY=base64:H0it+EIS0bJFcbDheYqM/c1RkEYzc+AaehqEs1qNECc=
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-ENV DB_CONNECTION=sqlite
-ENV DB_DATABASE=/app/database/database.sqlite
-
-CMD php artisan migrate --force 2>/dev/null; \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
